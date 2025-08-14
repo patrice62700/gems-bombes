@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jeu des Gems et Bombes 💎💣</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #222;
+        color: white;
+    }
+    h1 {
+        margin-top: 10px;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(5, 60px);
+        grid-gap: 5px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    button.cell {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        cursor: pointer;
+        background-color: #444;
+        border: 2px solid #666;
+        color: white;
+    }
+    button.cell:disabled {
+        background-color: #333;
+        cursor: default;
+    }
+    .controls {
+        margin-top: 20px;
+    }
+</style>
+</head>
+<body>
+
+<h1>💎 Gems & Bombes 💣</h1>
+<div class="controls">
+    <label for="bombes">Nombre de bombes :</label>
+    <input type="number" id="bombes" min="1" max="24" value="5">
+    <button onclick="demarrerJeu()">Démarrer</button>
+</div>
+
+<div class="grid" id="plateau"></div>
+
+<script>
+let cases = [];
+let decouvertes = [];
+let nbBombes = 5;
+let jeuFini = false;
+
+function demarrerJeu() {
+    nbBombes = parseInt(document.getElementById("bombes").value);
+    jeuFini = false;
+    decouvertes = [];
+    
+    // Créer les cases avec gems et bombes
+    cases = Array(25 - nbBombes).fill("💎").concat(Array(nbBombes).fill("💣"));
+    cases = cases.sort(() => Math.random() - 0.5); // Mélange aléatoire
+    
+    // Générer l'affichage
+    const plateau = document.getElementById("plateau");
+    plateau.innerHTML = "";
+    for (let i = 0; i < 25; i++) {
+        const btn = document.createElement("button");
+        btn.className = "cell";
+        btn.textContent = "❓";
+        btn.onclick = () => revelerCase(i, btn);
+        plateau.appendChild(btn);
+    }
+}
+
+function revelerCase(index, bouton) {
+    if (jeuFini || decouvertes.includes(index)) return;
+    decouvertes.push(index);
+    bouton.textContent = cases[index];
+    bouton.disabled = true;
+    
+    if (cases[index] === "💣") {
+        // Bombe → perdu
+        jeuFini = true;
+        alert("💥 BOOM ! Tu as perdu !");
+        revelerTout();
+    } else {
+        // Vérifier si toutes les gems sont trouvées
+        let victoire = true;
+        for (let i = 0; i < 25; i++) {
+            if (cases[i] === "💎" && !decouvertes.includes(i)) {
+                victoire = false;
+                break;
+            }
+        }
+        if (victoire) {
+            jeuFini = true;
+            alert("🎉 Bravo ! Tu as trouvé toutes les gems !");
+            revelerTout();
+        }
+    }
+}
+
+function revelerTout() {
+    const boutons = document.querySelectorAll(".cell");
+    boutons.forEach((btn, i) => {
+        btn.textContent = cases[i];
+        btn.disabled = true;
+    });
+}
+</script>
+
+</body>
+</html>
